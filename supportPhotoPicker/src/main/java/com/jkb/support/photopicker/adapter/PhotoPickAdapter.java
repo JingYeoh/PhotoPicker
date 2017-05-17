@@ -76,6 +76,13 @@ public class PhotoPickAdapter extends RecyclerView.Adapter<PhotoPickAdapter.View
         notifyDataSetChanged();
     }
 
+    /**
+     * 返回当前适配器中的图片
+     */
+    private List<Photo> getPhotos() {
+        return photos;
+    }
+
     private Photo getItem(int position) {
         return photoPickBean.isShowCamera() ? photos.get(position - 1) : photos.get(position);
     }

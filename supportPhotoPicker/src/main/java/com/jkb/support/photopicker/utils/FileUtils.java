@@ -24,6 +24,4 @@ public class FileUtils {
         return (options.mCancel || options.outWidth == -1
                 || options.outHeight == -1);
     }
-
-
 }

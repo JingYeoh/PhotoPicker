@@ -39,7 +39,6 @@ public class PhotoPickHelper {
                 Cursor cursor = contentResolver.query(loader.getUri(), loader.getProjection(), loader.getSelection(),
                         loader.getSelectionArgs(), loader.getSortOrder());
                 if (cursor == null) return;
-
                 List<PhotoDirectory> directories = Data.getDataFromCursor(context, cursor, checkImageStatus);
                 cursor.close();
                 if (resultCallback != null) {

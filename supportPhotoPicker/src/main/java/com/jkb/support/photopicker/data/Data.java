@@ -49,11 +49,9 @@ public class Data {
                     } else {
                         directories.get(directories.indexOf(photoDirectory)).addPhoto(imageId, path, size);
                     }
-
                     photoDirectoryAll.addPhoto(imageId, path, size);
                 }
             } else {
-
                 PhotoDirectory photoDirectory = new PhotoDirectory();
                 photoDirectory.setId(bucketId);
                 photoDirectory.setName(name);
@@ -69,15 +67,11 @@ public class Data {
 
                 photoDirectoryAll.addPhoto(imageId, path, size);
             }
-
-
         }
         if (photoDirectoryAll.getPhotoPaths().size() > 0) {
             photoDirectoryAll.setCoverPath(photoDirectoryAll.getPhotoPaths().get(0));
         }
         directories.add(INDEX_ALL_PHOTOS, photoDirectoryAll);
-
         return directories;
     }
-
 }

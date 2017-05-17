@@ -14,7 +14,7 @@ public class PhotoPickerFragment extends BaseFragment {
 
     public static PhotoPickerFragment newInstance(PhotoPickBean photoBean) {
         Bundle args = new Bundle();
-        args.putParcelable(PhotoPickConfig.KeyBundle.PHPTO_PICK, photoBean);
+        args.putParcelable(PhotoPickConfig.KeyBundle.PHOTO_PICK, photoBean);
         PhotoPickerFragment fragment = new PhotoPickerFragment();
         fragment.setArguments(args);
         return fragment;
@@ -38,7 +38,7 @@ public class PhotoPickerFragment extends BaseFragment {
         if (savedInstanceState == null) {
             args = getArguments();
         }
-        mPhotoBean = args.getParcelable(PhotoPickConfig.KeyBundle.PHPTO_PICK);
+        mPhotoBean = args.getParcelable(PhotoPickConfig.KeyBundle.PHOTO_PICK);
     }
 
     @Override
@@ -49,6 +49,6 @@ public class PhotoPickerFragment extends BaseFragment {
     @Override
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
-        outState.putParcelable(PhotoPickConfig.KeyBundle.PHPTO_PICK, mPhotoBean);
+        outState.putParcelable(PhotoPickConfig.KeyBundle.PHOTO_PICK, mPhotoBean);
     }
 }

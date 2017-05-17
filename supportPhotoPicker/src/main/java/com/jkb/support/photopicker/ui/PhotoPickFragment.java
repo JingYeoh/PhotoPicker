@@ -1,13 +1,19 @@
 package com.jkb.support.photopicker.ui;
 
 import android.Manifest;
+import android.content.ContentValues;
+import android.content.Intent;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.provider.MediaStore;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.text.TextUtils;
 import android.view.View;
+import android.widget.Toast;
 
 import com.jkb.support.photopicker.R;
 import com.jkb.support.photopicker.adapter.GalleryAdapter;
@@ -18,12 +24,15 @@ import com.jkb.support.photopicker.bean.PhotoPickBean;
 import com.jkb.support.photopicker.config.PhotoPickConfig;
 import com.jkb.support.photopicker.helper.PermissionHelper;
 import com.jkb.support.photopicker.helper.PhotoPickHelper;
+import com.jkb.support.photopicker.utils.UtilsHelper;
 import com.sothree.slidinguppanel.SlidingUpPanelLayout;
 import com.zhy.m.permission.MPermissions;
 import com.zhy.m.permission.PermissionDenied;
 import com.zhy.m.permission.PermissionGrant;
 
 import java.util.List;
+
+import static android.app.Activity.RESULT_OK;
 
 /**
  * 图片选择器
@@ -35,7 +44,7 @@ public class PhotoPickFragment extends BaseFragment implements GalleryAdapter.On
 
     public static PhotoPickFragment newInstance(PhotoPickBean photoBean) {
         Bundle args = new Bundle();
-        args.putParcelable(PhotoPickConfig.KeyBundle.PHPTO_PICK, photoBean);
+        args.putParcelable(PhotoPickConfig.KeyBundle.PHOTO_PICK, photoBean);
         PhotoPickFragment fragment = new PhotoPickFragment();
         fragment.setArguments(args);
         return fragment;
@@ -50,6 +59,7 @@ public class PhotoPickFragment extends BaseFragment implements GalleryAdapter.On
     private PhotoPickBean mPhotoBean;
     private PhotoPickAdapter photoPickAdapter;
     private GalleryAdapter galleryAdapter;
+    private Uri mCameraTemporaryUri;
 
     @Override
     protected int getRootViewId() {
@@ -78,7 +88,7 @@ public class PhotoPickFragment extends BaseFragment implements GalleryAdapter.On
         if (savedInstanceState == null) {
             args = getArguments();
         }
-        mPhotoBean = args.getParcelable(PhotoPickConfig.KeyBundle.PHPTO_PICK);
+        mPhotoBean = args.getParcelable(PhotoPickConfig.KeyBundle.PHOTO_PICK);
         if (mPhotoBean == null) {
             mPhotoBean = new PhotoPickBean();
         }
@@ -89,11 +99,7 @@ public class PhotoPickFragment extends BaseFragment implements GalleryAdapter.On
         galleryAdapter = new GalleryAdapter(mContext, mPhotoBean);
         galleryRecyclerView.setAdapter(galleryAdapter);
         //申请权限
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            requestPermission();
-        } else {
-            loadPhoto();//加载图片
-        }
+        checkStoragePermission();
     }
 
     @Override
@@ -106,7 +112,7 @@ public class PhotoPickFragment extends BaseFragment implements GalleryAdapter.On
     @Override
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
-        outState.putParcelable(PhotoPickConfig.KeyBundle.PHPTO_PICK, mPhotoBean);
+        outState.putParcelable(PhotoPickConfig.KeyBundle.PHOTO_PICK, mPhotoBean);
     }
 
     @Override
@@ -117,25 +123,45 @@ public class PhotoPickFragment extends BaseFragment implements GalleryAdapter.On
     }
 
     /**
-     * 请求权限
+     * 检查存储权限
      */
-    private void requestPermission() {
+    private void checkStoragePermission() {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
+            loadPhoto();
+            return;
+        }
         if (!PermissionHelper.checkPermission(mContext, Manifest.permission.WRITE_EXTERNAL_STORAGE)) {
-            PermissionHelper.requestPermission(this, PhotoPickConfig.PermissionRequestCode.SDCARD,
+            PermissionHelper.requestPermission(this, PhotoPickConfig.RequestCode.PERMISSION_SDCARD,
                     Manifest.permission.WRITE_EXTERNAL_STORAGE);
         } else {
             loadPhoto();
         }
     }
 
+    /**
+     * 检查相机权限
+     */
+    private void checkCameraPermission() {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
+            launchCameraToSelectPhoto();
+            return;
+        }
+        if (!PermissionHelper.checkPermission(mContext, Manifest.permission.CAMERA)) {
+            PermissionHelper.requestPermission(this, PhotoPickConfig.RequestCode.PERMISSION_CAMERA,
+                    Manifest.permission.CAMERA);
+        } else {
+            launchCameraToSelectPhoto();
+        }
+    }
+
     //读写权限请求成功
-    @PermissionGrant(PhotoPickConfig.PermissionRequestCode.SDCARD)
+    @PermissionGrant(PhotoPickConfig.RequestCode.PERMISSION_SDCARD)
     public void requestSdcardSuccess() {
         loadPhoto();
     }
 
     //读写权限请求失败
-    @PermissionDenied(PhotoPickConfig.PermissionRequestCode.SDCARD)
+    @PermissionDenied(PhotoPickConfig.RequestCode.PERMISSION_SDCARD)
     public void requestSdcardFailed() {
         PermissionHelper.showSystemSettingDialog(mContext, getString(R.string.permission_tip_SD),
                 new PermissionHelper.OnSystemSettingDialogListener() {
@@ -147,13 +173,13 @@ public class PhotoPickFragment extends BaseFragment implements GalleryAdapter.On
     }
 
     //相机权限请求成功
-    @PermissionGrant(PhotoPickConfig.PermissionRequestCode.CAMERA)
+    @PermissionGrant(PhotoPickConfig.RequestCode.PERMISSION_CAMERA)
     public void requestCameraSuccess() {
         launchCameraToSelectPhoto();
     }
 
     //相机权限请求失败
-    @PermissionDenied(PhotoPickConfig.PermissionRequestCode.CAMERA)
+    @PermissionDenied(PhotoPickConfig.RequestCode.PERMISSION_CAMERA)
     public void requestCameraFailed() {
         PermissionHelper.showSystemSettingDialog(mContext, getString(R.string.permission_tip_SD),
                 new PermissionHelper.OnSystemSettingDialogListener() {
@@ -213,13 +239,46 @@ public class PhotoPickFragment extends BaseFragment implements GalleryAdapter.On
 
     @Override
     public void onCameraClick() {//调用系统相机拍照
-
+        checkCameraPermission();
     }
 
     /**
      * 启动相机并选择图片
      */
     private void launchCameraToSelectPhoto() {
+        if (!android.os.Environment.getExternalStorageState().equals(android.os.Environment.MEDIA_MOUNTED)) {
+            Toast.makeText(mContext, R.string.cannot_take_pic, Toast.LENGTH_SHORT).show();
+            return;
+        }
+        // 直接将拍到的照片存到手机默认的文件夹
+        Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+        ContentValues values = new ContentValues();
+        mCameraTemporaryUri = mContext.getContentResolver()
+                .insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, values);
+        intent.putExtra(MediaStore.EXTRA_OUTPUT, mCameraTemporaryUri);
+        startActivityForResult(intent, PhotoPickConfig.RequestCode.CAMERA);
+    }
 
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (resultCode != RESULT_OK) return;
+        switch (requestCode) {
+            case PhotoPickConfig.RequestCode.CAMERA://相机
+                handleCameraResult();
+                break;
+        }
+    }
+
+    /**
+     * 处理相机返回结果
+     */
+    private void handleCameraResult() {
+        String filePath = UtilsHelper.getRealPathFromURI(mCameraTemporaryUri, mContext);
+        showShortToast(filePath);
+        if (TextUtils.isEmpty(filePath)) {
+            Toast.makeText(mContext, R.string.unable_find_pic, Toast.LENGTH_LONG).show();
+        } else {
+            loadPhoto();
+        }
     }
 }
