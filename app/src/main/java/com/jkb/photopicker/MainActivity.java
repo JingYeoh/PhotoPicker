@@ -1,13 +1,38 @@
 package com.jkb.photopicker;
 
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 
-public class MainActivity extends AppCompatActivity {
+import com.jkb.support.photopicker.config.PhotoPicker;
+import com.jkb.support.photopicker.ui.PhotoPickFragment;
+
+public class MainActivity extends BaseActivity {
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
+    protected int getRootViewId() {
+        return R.layout.activity_main;
+    }
+
+    @Override
+    protected void initView() {
+
+    }
+
+    @Override
+    protected void initData(Bundle savedInstanceState) {
+        if (savedInstanceState == null) {
+            PhotoPickFragment fragment = new PhotoPicker.Builder()
+                    .imageLoader(new PhotoImageLoader()).build().createPick();
+            startFragment(fragment);
+        }
+    }
+
+    @Override
+    protected void initListener() {
+
+    }
+
+    @Override
+    public int getFragmentContentId() {
+        return R.id.mainFrame;
     }
 }

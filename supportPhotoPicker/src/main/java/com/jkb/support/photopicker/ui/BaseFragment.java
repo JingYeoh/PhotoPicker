@@ -18,15 +18,9 @@ import com.jkb.support.ui.SupportFragment;
  * Created by yj on 2017/5/16.
  */
 
-@SuppressLint("ValidFragment")
 abstract class BaseFragment extends SupportFragment {
     //view
     protected View rootView;
-
-    @Override
-    public void onCreate(@Nullable Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-    }
 
     @Nullable
     @Override

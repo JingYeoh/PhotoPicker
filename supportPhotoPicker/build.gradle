@@ -1,5 +1,6 @@
 apply plugin: 'com.android.library'
 apply plugin: 'com.novoda.bintray-release'
+apply plugin: 'com.neenbedankt.android-apt'
 
 def appVerCode = 1
 def appVerName = "1.0.0"
@@ -42,6 +43,8 @@ dependencies {
     })
     compile 'com.android.support:appcompat-v7:25.3.1'
     testCompile 'junit:junit:4.12'
-    compile 'com.justkiddingbaby:supportfragment:1+'
+    compile 'com.justkiddingbaby:supportfragment:1.1.2'
     compile 'com.sothree.slidinguppanel:library:3.3.1'
+    compile 'com.zhy:mpermission-api:1.0.0'
+    apt 'com.zhy:mpermission-compiler:1.0.0'
 }

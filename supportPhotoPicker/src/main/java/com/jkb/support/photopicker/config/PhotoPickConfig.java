@@ -26,4 +26,12 @@ public interface PhotoPickConfig {
     interface KeyBundle {
         String PHPTO_PICK = "photoPick";
     }
+
+    /**
+     * 权限请求
+     */
+    interface PermissionRequestCode {
+        int SDCARD = 100;
+        int CAMERA = 200;
+    }
 }

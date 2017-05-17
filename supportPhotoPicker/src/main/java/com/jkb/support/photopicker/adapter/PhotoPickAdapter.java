@@ -17,6 +17,7 @@ import com.jkb.support.photopicker.bean.PhotoPickBean;
 import com.jkb.support.photopicker.listener.PhotoPickChangedListener;
 
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * 图片展示的数据适配器
@@ -66,6 +67,15 @@ public class PhotoPickAdapter extends RecyclerView.Adapter<PhotoPickAdapter.View
                 : (photos == null ? 0 : photos.size());
     }
 
+    /**
+     * 刷新图片列表
+     */
+    public void refresh(List<Photo> photos) {
+        this.photos.clear();
+        this.photos.addAll(photos);
+        notifyDataSetChanged();
+    }
+
     private Photo getItem(int position) {
         return photoPickBean.isShowCamera() ? photos.get(position - 1) : photos.get(position);
     }
@@ -79,8 +89,8 @@ public class PhotoPickAdapter extends RecyclerView.Adapter<PhotoPickAdapter.View
             super(view);
             imageView = (ImageView) view.findViewById(R.id.ipp_iv);
             checkBox = (CheckBox) view.findViewById(R.id.ipp_cb);
-            imageView.getLayoutParams().height = imageSize;
-            imageView.getLayoutParams().width = imageSize;
+            view.getLayoutParams().height = imageSize;
+            view.getLayoutParams().width = imageSize;
             //listener
             checkBox.setOnClickListener(this);
             imageView.setOnClickListener(this);
@@ -96,7 +106,15 @@ public class PhotoPickAdapter extends RecyclerView.Adapter<PhotoPickAdapter.View
             if (v.getId() == R.id.ipp_iv) {
                 //图片被点击
                 if (onPhotoItemClickListener != null) {
-                    onPhotoItemClickListener.onPhotoItemClick(getAdapterPosition());
+                    if (photoPickBean.isShowCamera()) {
+                        if (getAdapterPosition() == 0) {
+                            onPhotoItemClickListener.onCameraClick();
+                        } else {
+                            onPhotoItemClickListener.onPhotoItemClick(getAdapterPosition() - 1);
+                        }
+                    } else {
+                        onPhotoItemClickListener.onPhotoItemClick(getAdapterPosition());
+                    }
                 }
             } else if (v.getId() == R.id.ipp_cb) {
                 if (selectPhotos.contains(getItem(position).getPath())) {
@@ -157,5 +175,10 @@ public class PhotoPickAdapter extends RecyclerView.Adapter<PhotoPickAdapter.View
          * @param position 被点击的条目
          */
         void onPhotoItemClick(int position);
+
+        /**
+         * 相机被点击
+         */
+        void onCameraClick();
     }
 }
