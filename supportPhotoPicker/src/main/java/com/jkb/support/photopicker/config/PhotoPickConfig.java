@@ -25,6 +25,12 @@ public interface PhotoPickConfig {
 
     interface KeyBundle {
         String PHOTO_PICK = "photoPick";
+        String PHOTO_PREVIEW_POSITION = "photo.preview.position";
+        String PHOTO_PHOTOS = "photo.photos";
+
+        String FRAGMENT_TAG_PICK = "fragment.tag.pick";
+        String FRAGMENT_TAG_CLIP = "fragment.tag.clip";
+        String FRAGMENT_TAG_PREVIEW = "fragment.tag.preView";
     }
 
     /**

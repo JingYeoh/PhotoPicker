@@ -3,7 +3,7 @@ package com.jkb.photopicker;
 import android.os.Bundle;
 
 import com.jkb.support.photopicker.config.PhotoPicker;
-import com.jkb.support.photopicker.ui.PhotoPickFragment;
+import com.jkb.support.photopicker.ui.PhotoPickerFragment;
 
 public class MainActivity extends BaseActivity {
 
@@ -20,9 +20,9 @@ public class MainActivity extends BaseActivity {
     @Override
     protected void initData(Bundle savedInstanceState) {
         if (savedInstanceState == null) {
-            PhotoPickFragment fragment = new PhotoPicker.Builder()
-                    .imageLoader(new PhotoImageLoader()).build().createPick();
-            startFragment(fragment);
+            PhotoPickerFragment picker = new PhotoPicker.Builder()
+                    .imageLoader(new PhotoImageLoader()).build().createPicker();
+            startFragment(picker);
         }
     }
 

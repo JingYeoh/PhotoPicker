@@ -1,16 +1,16 @@
 package com.jkb.support.photopicker.bean;
 
-import android.os.Parcel;
-import android.os.Parcelable;
+import java.io.Serializable;
 
 /**
  * 照片属性
  */
-public class Photo implements Parcelable {
+public class Photo implements Serializable {
 
     private int id;
     private String path;
     private long size;//byte 字节
+    private boolean isSelected;//是否被选中
 
     public Photo(int id, String path) {
         this.id = id;
@@ -26,31 +26,11 @@ public class Photo implements Parcelable {
     public Photo() {
     }
 
-    private Photo(Parcel in) {
-        id = in.readInt();
-        path = in.readString();
-        size = in.readLong();
-    }
-
-    public static final Creator<Photo> CREATOR = new Creator<Photo>() {
-        @Override
-        public Photo createFromParcel(Parcel in) {
-            return new Photo(in);
-        }
-
-        @Override
-        public Photo[] newArray(int size) {
-            return new Photo[size];
-        }
-    };
-
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (!(o instanceof Photo)) return false;
-
         Photo photo = (Photo) o;
-
         return id == photo.id;
     }
 
@@ -83,15 +63,11 @@ public class Photo implements Parcelable {
         this.size = size;
     }
 
-    @Override
-    public int describeContents() {
-        return 0;
+    public boolean isSelected() {
+        return isSelected;
     }
 
-    @Override
-    public void writeToParcel(Parcel dest, int flags) {
-        dest.writeInt(id);
-        dest.writeString(path);
-        dest.writeLong(size);
+    public void setSelected(boolean selected) {
+        isSelected = selected;
     }
 }

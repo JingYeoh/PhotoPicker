@@ -24,6 +24,8 @@ import com.jkb.support.photopicker.bean.PhotoPickBean;
 import com.jkb.support.photopicker.config.PhotoPickConfig;
 import com.jkb.support.photopicker.helper.PermissionHelper;
 import com.jkb.support.photopicker.helper.PhotoPickHelper;
+import com.jkb.support.photopicker.listener.OnPhotoPickItemClickListener;
+import com.jkb.support.photopicker.listener.PhotoSelectResultCallback;
 import com.jkb.support.photopicker.utils.UtilsHelper;
 import com.sothree.slidinguppanel.SlidingUpPanelLayout;
 import com.zhy.m.permission.MPermissions;
@@ -61,6 +63,10 @@ public class PhotoPickFragment extends BaseFragment implements GalleryAdapter.On
     private GalleryAdapter galleryAdapter;
     private Uri mCameraTemporaryUri;
 
+    //listener
+    private PhotoSelectResultCallback photoSelectResultCallback;
+    private OnPhotoPickItemClickListener photoPickItemClickListener;
+
     @Override
     protected int getRootViewId() {
         return R.layout.frg_photo_pick;
@@ -94,12 +100,12 @@ public class PhotoPickFragment extends BaseFragment implements GalleryAdapter.On
         }
         //初始化适配器及其他
         photoRecyclerView.setLayoutManager(new GridLayoutManager(mContext, mPhotoBean.getSpanCount()));
-        photoPickAdapter = new PhotoPickAdapter(mContext, mPhotoBean);
+        if (photoPickAdapter == null) photoPickAdapter = new PhotoPickAdapter(mContext, mPhotoBean);
         photoRecyclerView.setAdapter(photoPickAdapter);
-        galleryAdapter = new GalleryAdapter(mContext, mPhotoBean);
+        if (galleryAdapter == null) galleryAdapter = new GalleryAdapter(mContext, mPhotoBean);
         galleryRecyclerView.setAdapter(galleryAdapter);
-        //申请权限
-        checkStoragePermission();
+
+        startLoadPhoto();  //申请权限
     }
 
     @Override
@@ -125,7 +131,7 @@ public class PhotoPickFragment extends BaseFragment implements GalleryAdapter.On
     /**
      * 检查存储权限
      */
-    private void checkStoragePermission() {
+    public void startLoadPhoto() {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
             loadPhoto();
             return;
@@ -197,6 +203,7 @@ public class PhotoPickFragment extends BaseFragment implements GalleryAdapter.On
         PhotoPickHelper.getPhotoDirs(mContext, new PhotoPickHelper.PhotosResultCallback() {
             @Override
             public void onResultCallback(final List<PhotoDirectory> directories) {
+                if (mActivity == null) return;
                 mActivity.runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
@@ -234,7 +241,8 @@ public class PhotoPickFragment extends BaseFragment implements GalleryAdapter.On
 
     @Override
     public void onPhotoItemClick(int position) {//图片被点击
-
+        if (photoPickItemClickListener == null || photoPickAdapter == null) return;
+        photoPickItemClickListener.onPhotoItemClick(position, photoPickAdapter.getPhotos());
     }
 
     @Override
@@ -278,7 +286,30 @@ public class PhotoPickFragment extends BaseFragment implements GalleryAdapter.On
         if (TextUtils.isEmpty(filePath)) {
             Toast.makeText(mContext, R.string.unable_find_pic, Toast.LENGTH_LONG).show();
         } else {
-            loadPhoto();
+            startLoadPhoto();
         }
+    }
+
+    /**
+     * 添加图片选择结果的回调
+     */
+    public void addPhotoSelectResultCallback(PhotoSelectResultCallback callback) {
+        photoSelectResultCallback = callback;
+    }
+
+    /**
+     * 设置图片条目的点击监听事件
+     */
+    public void setOnPhotoPickItemClickListener(OnPhotoPickItemClickListener listener) {
+        photoPickItemClickListener = listener;
+    }
+
+    /**
+     * 完成选择
+     */
+    public void pickDone() {
+        if (photoSelectResultCallback == null) return;
+        if (photoPickAdapter == null) return;
+        photoSelectResultCallback.onPhotoSelectComplected(photoPickAdapter.getSelectPhotos());
     }
 }

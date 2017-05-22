@@ -1,6 +1,5 @@
 package com.jkb.support.photopicker.ui;
 
-import android.annotation.SuppressLint;
 import android.os.Bundle;
 import android.support.annotation.IdRes;
 import android.support.annotation.LayoutRes;

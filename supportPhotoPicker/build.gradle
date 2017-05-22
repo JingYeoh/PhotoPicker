@@ -47,4 +47,6 @@ dependencies {
     compile 'com.sothree.slidinguppanel:library:3.3.1'
     compile 'com.zhy:mpermission-api:1.0.0'
     apt 'com.zhy:mpermission-compiler:1.0.0'
+    compile 'com.github.yalantis:ucrop:2.2.1'
+    compile 'com.github.chrisbanes:PhotoView:2.0.0'
 }

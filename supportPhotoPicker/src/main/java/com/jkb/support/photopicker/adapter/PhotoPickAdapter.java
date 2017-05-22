@@ -2,6 +2,7 @@ package com.jkb.support.photopicker.adapter;
 
 import android.app.Activity;
 import android.content.Context;
+import android.support.annotation.StringRes;
 import android.support.v7.widget.RecyclerView;
 import android.util.DisplayMetrics;
 import android.view.Display;
@@ -79,8 +80,15 @@ public class PhotoPickAdapter extends RecyclerView.Adapter<PhotoPickAdapter.View
     /**
      * 返回当前适配器中的图片
      */
-    private List<Photo> getPhotos() {
+    public List<Photo> getPhotos() {
         return photos;
+    }
+
+    /**
+     * 获取选中的图片
+     */
+    public List<String> getSelectPhotos() {
+        return selectPhotos;
     }
 
     private Photo getItem(int position) {
@@ -126,9 +134,11 @@ public class PhotoPickAdapter extends RecyclerView.Adapter<PhotoPickAdapter.View
             } else if (v.getId() == R.id.ipp_cb) {
                 if (selectPhotos.contains(getItem(position).getPath())) {
                     checkBox.setChecked(false);
+                    getItem(getAdapterPosition()).setSelected(false);
                     selectPhotos.remove(getItem(position).getPath());
                 } else {
                     checkBox.setChecked(true);
+                    getItem(getAdapterPosition()).setSelected(true);
                     selectPhotos.add(getItem(position).getPath());
                 }
                 if (photoPickChangedListener != null) {
@@ -151,7 +161,7 @@ public class PhotoPickAdapter extends RecyclerView.Adapter<PhotoPickAdapter.View
                     checkBox.setVisibility(View.GONE);
                 } else {
                     checkBox.setVisibility(View.VISIBLE);
-                    checkBox.setChecked(selectPhotos.contains(photo.getPath()));
+                    checkBox.setChecked(getPhotos().get(position).isSelected());
                 }
                 String url = photo.getPath();
                 photoPickBean.getImageLoader().displayImage(context, url, imageView, true);
