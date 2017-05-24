@@ -23,7 +23,8 @@
             android:id="@+id/pick_rv_photo"
             android:layout_width="match_parent"
             android:layout_height="0dp"
-            android:layout_weight="1"/>
+            android:layout_weight="1"
+            android:scrollbars="vertical"/>
     </LinearLayout>
 
     <LinearLayout
@@ -54,6 +55,7 @@
         <android.support.v7.widget.RecyclerView
             android:id="@+id/pick_rv_gallery"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"/>
+            android:layout_height="match_parent"
+            android:scrollbars="vertical"/>
     </LinearLayout>
 </com.sothree.slidinguppanel.SlidingUpPanelLayout>

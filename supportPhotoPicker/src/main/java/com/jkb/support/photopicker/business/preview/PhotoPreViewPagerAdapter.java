@@ -1,4 +1,4 @@
-package com.jkb.support.photopicker.adapter;
+package com.jkb.support.photopicker.business.preview;
 
 import android.content.Context;
 import android.support.v4.view.PagerAdapter;

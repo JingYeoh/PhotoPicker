@@ -4,10 +4,10 @@ import android.support.annotation.DrawableRes;
 import android.support.annotation.NonNull;
 
 import com.jkb.support.photopicker.bean.PhotoPickBean;
+import com.jkb.support.photopicker.business.clip.PhotoClipFragment;
+import com.jkb.support.photopicker.business.pick.PhotoPickFragment;
+import com.jkb.support.photopicker.business.picker.PhotoPickerFragment;
 import com.jkb.support.photopicker.loader.ImageLoader;
-import com.jkb.support.photopicker.ui.PhotoClipFragment;
-import com.jkb.support.photopicker.ui.PhotoPickFragment;
-import com.jkb.support.photopicker.ui.PhotoPickerFragment;
 
 /**
  * 图片选择器类

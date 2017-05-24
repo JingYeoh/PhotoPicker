@@ -24,7 +24,7 @@
         android:paddingRight="@dimen/layout_padding_16dp">
 
         <TextView
-            android:id="@+id/fpp_preview"
+            android:id="@+id/fpp_edit"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_centerVertical="true"

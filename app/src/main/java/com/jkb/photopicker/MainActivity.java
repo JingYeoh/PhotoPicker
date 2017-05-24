@@ -2,8 +2,8 @@ package com.jkb.photopicker;
 
 import android.os.Bundle;
 
+import com.jkb.support.photopicker.business.picker.PhotoPickerFragment;
 import com.jkb.support.photopicker.config.PhotoPicker;
-import com.jkb.support.photopicker.ui.PhotoPickerFragment;
 
 public class MainActivity extends BaseActivity {
 

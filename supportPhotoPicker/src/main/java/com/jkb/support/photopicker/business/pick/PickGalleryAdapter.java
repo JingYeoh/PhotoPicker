@@ -1,4 +1,4 @@
-package com.jkb.support.photopicker.adapter;
+package com.jkb.support.photopicker.business.pick;
 
 import android.app.Activity;
 import android.content.Context;
@@ -12,7 +12,6 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.jkb.support.photopicker.R;
-import com.jkb.support.photopicker.bean.Photo;
 import com.jkb.support.photopicker.bean.PhotoDirectory;
 import com.jkb.support.photopicker.bean.PhotoPickBean;
 
@@ -20,47 +19,50 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * 相册数据适配器
- * Created by yj on 2017/5/17.
+ * 图片选择器：相册的数据适配器
+ * Created by yj on 2017/5/23.
  */
 
-public class GalleryAdapter extends RecyclerView.Adapter<GalleryAdapter.ViewHolder> {
+class PickGalleryAdapter extends RecyclerView.Adapter<PickGalleryAdapter.ViewHolder> {
 
     private Context context;
     private PhotoPickBean photoPickBean;
-    private int selected;
-    private List<PhotoDirectory> directories = new ArrayList<>();
-    private int imageSize;
+    public int selected = 0;
+    private List<PhotoDirectory> directories;
+    private int imageLength;
 
     private OnGalleryItemClickListener onGalleryItemClickListener;
 
-    public GalleryAdapter(Context context, PhotoPickBean photoPickBean) {
+    PickGalleryAdapter(Context context, PhotoPickBean photoPickBean) {
         this.context = context;
         this.photoPickBean = photoPickBean;
+        //初始化数据
+        selected = 0;
+        directories = new ArrayList<>();
+        //初始化属性
         DisplayMetrics metrics = new DisplayMetrics();
         Display display = ((Activity) context).getWindowManager().getDefaultDisplay();
         display.getMetrics(metrics);
-        this.imageSize = metrics.widthPixels / 6;
+        imageLength = metrics.widthPixels / 6;
     }
 
     /**
-     * 刷新相册
+     * 刷新
      */
-    public void refresh(List<PhotoDirectory> directories) {
-        this.directories.clear();
-        this.directories.addAll(directories);
+    void refresh(ArrayList<PhotoDirectory> directories) {
+        this.directories = directories;
         notifyDataSetChanged();
     }
 
     @Override
     public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_photo_gallery, null);
+        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_photo_gallery, parent, false);
         return new ViewHolder(view);
     }
 
     @Override
     public void onBindViewHolder(ViewHolder holder, int position) {
-        holder.showGalleryView(getItem(position), position);
+        holder.showGalleryItemView(position);
     }
 
     @Override
@@ -68,11 +70,7 @@ public class GalleryAdapter extends RecyclerView.Adapter<GalleryAdapter.ViewHold
         return directories.size();
     }
 
-    private PhotoDirectory getItem(int position) {
-        return this.directories.get(position);
-    }
-
-    private void changeSelect(int position) {
+    public void changeSelect(int position) {
         this.selected = position;
         notifyDataSetChanged();
     }
@@ -83,32 +81,23 @@ public class GalleryAdapter extends RecyclerView.Adapter<GalleryAdapter.ViewHold
         private ImageView photo_gallery_select;
         private TextView name, num;
 
-        public ViewHolder(View itemView) {
+        ViewHolder(View itemView) {
             super(itemView);
             imageView = (ImageView) itemView.findViewById(R.id.ipg_iv_photo);
             name = (TextView) itemView.findViewById(R.id.ipg_tv_name);
             num = (TextView) itemView.findViewById(R.id.ipg_tv_num);
             photo_gallery_select = (ImageView) itemView.findViewById(R.id.ipg_selected);
-            imageView.getLayoutParams().height = imageSize;
-            imageView.getLayoutParams().width = imageSize;
+            imageView.getLayoutParams().height = imageLength;
+            imageView.getLayoutParams().width = imageLength;
             itemView.setOnClickListener(this);
         }
 
-        @Override
-        public void onClick(View v) {
-            int position = getAdapterPosition();
-            if (v.getId() == R.id.photo_gallery_rl) {
-                if (onGalleryItemClickListener != null) {
-                    changeSelect(position);
-                    onGalleryItemClickListener.onGalleryItemClick(getItem(position).getPhotos());
-                }
-            }
-        }
-
-        void showGalleryView(PhotoDirectory directory, int position) {
-            if (directory == null || directory.getCoverPath() == null) {
-                return;
-            }
+        /**
+         * 显示相册条目视图
+         */
+        void showGalleryItemView(int position) {
+            PhotoDirectory directory = directories.get(position);
+            if (directory == null || directory.getCoverPath() == null) return;
             if (selected == position) {
                 photo_gallery_select.setVisibility(View.VISIBLE);
             } else {
@@ -118,16 +107,27 @@ public class GalleryAdapter extends RecyclerView.Adapter<GalleryAdapter.ViewHold
             num.setText(context.getString(R.string.gallery_num, String.valueOf(directory.getPhotoPaths().size())));
             photoPickBean.getImageLoader().displayImage(context, directory.getCoverPath(), imageView, true);
         }
+
+        @Override
+        public void onClick(View v) {
+            int position = getAdapterPosition();
+            if (v.getId() == R.id.photo_gallery_rl) {
+                if (onGalleryItemClickListener != null) {
+                    changeSelect(position);
+                    onGalleryItemClickListener.onGalleryItemClick(position);
+                }
+            }
+        }
     }
 
-    public void setOnGalleryItemClickListener(OnGalleryItemClickListener onGalleryItemClickListener) {
+    void setOnGalleryItemClickListener(OnGalleryItemClickListener onGalleryItemClickListener) {
         this.onGalleryItemClickListener = onGalleryItemClickListener;
     }
 
-    public interface OnGalleryItemClickListener {
+    interface OnGalleryItemClickListener {
         /**
          * 相册条目被点击
          */
-        void onGalleryItemClick(List<Photo> photos);
+        void onGalleryItemClick(int position);
     }
 }

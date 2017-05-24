@@ -12,7 +12,7 @@ public class PhotoDirectory {
     private String coverPath;
     private String name;
     private long dateAdded;
-    private List<Photo> photos = new ArrayList<>();
+    private ArrayList<Photo> photos = new ArrayList<>();
 
     @Override
     public boolean equals(Object o) {
@@ -64,16 +64,16 @@ public class PhotoDirectory {
         this.dateAdded = dateAdded;
     }
 
-    public List<Photo> getPhotos() {
+    public ArrayList<Photo> getPhotos() {
         return photos;
     }
 
-    public void setPhotos(List<Photo> photos) {
+    public void setPhotos(ArrayList<Photo> photos) {
         this.photos = photos;
     }
 
-    public List<String> getPhotoPaths() {
-        List<String> paths = new ArrayList<>(photos.size());
+    public ArrayList<String> getPhotoPaths() {
+        ArrayList<String> paths = new ArrayList<>(photos.size());
         for (Photo photo : photos) {
             paths.add(photo.getPath());
         }
