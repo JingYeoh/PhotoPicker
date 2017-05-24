@@ -41,6 +41,7 @@ public class PhotoPreviewFragment extends PhotoPickBaseFragment implements Photo
     private PhotoPickBean mPhotoBean;
     //view
     private ViewPager viewPager;
+    private PhotoPreViewPagerAdapter photoPreViewPagerAdapter;
     private CheckBox checkBox;
     //listener
     private OnPhotoClipItemClickListener onPhotoClipItemClickListener;
@@ -68,7 +69,9 @@ public class PhotoPreviewFragment extends PhotoPickBaseFragment implements Photo
         mPhotos = (ArrayList<Photo>) args.getSerializable(PhotoPickConfig.KeyBundle.PHOTO_PHOTOS);
         mPhotoBean = args.getParcelable(PhotoPickConfig.KeyBundle.PHOTO_PICK);
 
-        PhotoPreViewPagerAdapter photoPreViewPagerAdapter = new PhotoPreViewPagerAdapter(mContext, mPhotoBean, mPhotos);
+        if (photoPreViewPagerAdapter == null) {
+            photoPreViewPagerAdapter = new PhotoPreViewPagerAdapter(mContext, mPhotoBean, mPhotos);
+        }
         viewPager.setAdapter(photoPreViewPagerAdapter);
         viewPager.setCurrentItem(mCurrentPosition);
         checkBox.setChecked(mPhotos.get(mCurrentPosition).isSelected());
@@ -113,6 +116,13 @@ public class PhotoPreviewFragment extends PhotoPickBaseFragment implements Photo
             mPhotos.get(mCurrentPosition).setSelected(checkBox.isChecked());
             if (photoSelectStatusChangedListener == null) return;
             photoSelectStatusChangedListener.onPhotoSelectChanged(mPhotos.size(), getSelectPhoto().size());
+        }
+    }
+
+    @Override
+    public void refreshPhotos() {//刷新图片
+        if (photoPreViewPagerAdapter != null) {
+            photoPreViewPagerAdapter.refresh(mCurrentPosition);
         }
     }
 

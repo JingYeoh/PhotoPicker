@@ -11,6 +11,7 @@ import com.jkb.support.photopicker.R;
 import com.jkb.support.photopicker.bean.Photo;
 import com.jkb.support.photopicker.bean.PhotoPickBean;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -18,16 +19,25 @@ import java.util.List;
  * Created by yj on 2017/5/22.
  */
 
-public class PhotoPreViewPagerAdapter extends PagerAdapter {
+class PhotoPreViewPagerAdapter extends PagerAdapter {
 
     private Context context;
     private PhotoPickBean photoPickBean;
-    public List<Photo> mPhotos;
+    private List<Photo> mPhotos;
+    private int currentRefreshPosition = -1;
 
-    public PhotoPreViewPagerAdapter(Context context, PhotoPickBean photoPickBean, List<Photo> mPhotos) {
+    PhotoPreViewPagerAdapter(Context context, PhotoPickBean photoPickBean, List<Photo> mPhotos) {
         this.context = context;
         this.photoPickBean = photoPickBean;
         this.mPhotos = mPhotos;
+    }
+
+    /**
+     * 刷新
+     */
+    void refresh(int position) {
+        currentRefreshPosition = position;
+        notifyDataSetChanged();
     }
 
     @Override
@@ -41,13 +51,24 @@ public class PhotoPreViewPagerAdapter extends PagerAdapter {
     }
 
     @Override
+    public int getItemPosition(Object object) {
+        View view = (View) object;
+        if (currentRefreshPosition == (Integer) view.getTag()) {
+            return POSITION_NONE;
+        } else {
+            return POSITION_UNCHANGED;
+        }
+    }
+
+    @Override
     public View instantiateItem(ViewGroup container, int position) {
         String bigImgUrl = mPhotos.get(position).getPath();
         View view = LayoutInflater.from(context).inflate(R.layout.item_photo_preview, container,
                 false);
         PhotoView imageView = (PhotoView) view.findViewById(R.id.iv_media_image);
         photoPickBean.getImageLoader().displayImage(context, bigImgUrl, imageView, false);
-        container.addView(view, 0);
+        view.setTag(position);
+        container.addView(view);
         return view;
     }
 

@@ -2,6 +2,7 @@ package com.jkb.support.photopicker.bean;
 
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.support.annotation.ColorRes;
 import android.support.annotation.DrawableRes;
 
 import com.jkb.support.photopicker.R;
@@ -27,6 +28,8 @@ public class PhotoPickBean implements Parcelable {
     @DrawableRes
     private int failedPictureResId;     //缓存的图片资源id
     private ImageLoader imageLoader;    //加载方式
+    @ColorRes
+    private int clipActionBarBackgroundColor;//图片裁剪的背景颜色
 
     public PhotoPickBean() {
         //生成默认配置
@@ -39,6 +42,7 @@ public class PhotoPickBean implements Parcelable {
         setOriginalPicture(false);
         setCameraResId(R.drawable.take_photo);
         setFailedPictureResId(R.drawable.failure_image);
+        setClipActionBarBackgroundColor(R.color.colorPrimary);
     }
 
     protected PhotoPickBean(Parcel in) {
@@ -51,6 +55,26 @@ public class PhotoPickBean implements Parcelable {
         isOriginalPicture = in.readByte() != 0;
         cameraResId = in.readInt();
         failedPictureResId = in.readInt();
+        clipActionBarBackgroundColor = in.readInt();
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeInt(maxPickSize);
+        dest.writeInt(spanCount);
+        dest.writeInt(pickMode);
+        dest.writeInt(clipMode);
+        dest.writeByte((byte) (isShowCamera ? 1 : 0));
+        dest.writeByte((byte) (isClipPhoto ? 1 : 0));
+        dest.writeByte((byte) (isOriginalPicture ? 1 : 0));
+        dest.writeInt(cameraResId);
+        dest.writeInt(failedPictureResId);
+        dest.writeInt(clipActionBarBackgroundColor);
+    }
+
+    @Override
+    public int describeContents() {
+        return 0;
     }
 
     public static final Creator<PhotoPickBean> CREATOR = new Creator<PhotoPickBean>() {
@@ -145,21 +169,11 @@ public class PhotoPickBean implements Parcelable {
         this.imageLoader = imageLoader;
     }
 
-    @Override
-    public int describeContents() {
-        return 0;
+    public int getClipActionBarBackgroundColor() {
+        return clipActionBarBackgroundColor;
     }
 
-    @Override
-    public void writeToParcel(Parcel dest, int flags) {
-        dest.writeInt(maxPickSize);
-        dest.writeInt(spanCount);
-        dest.writeInt(pickMode);
-        dest.writeInt(clipMode);
-        dest.writeByte((byte) (isShowCamera ? 1 : 0));
-        dest.writeByte((byte) (isClipPhoto ? 1 : 0));
-        dest.writeByte((byte) (isOriginalPicture ? 1 : 0));
-        dest.writeInt(cameraResId);
-        dest.writeInt(failedPictureResId);
+    public void setClipActionBarBackgroundColor(int clipActionBarBackgroundColor) {
+        this.clipActionBarBackgroundColor = clipActionBarBackgroundColor;
     }
 }

@@ -1,5 +1,8 @@
 package com.jkb.support.photopicker.business.picker;
 
+import android.app.Activity;
+import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.text.TextUtils;
 
@@ -17,7 +20,12 @@ import com.jkb.support.photopicker.business.preview.PhotoPreviewFragment;
 import com.jkb.support.photopicker.business.preview.i.OnPhotoClipItemClickListener;
 import com.jkb.support.photopicker.business.preview.i.PhotoPreviewOnBackResultCallback;
 import com.jkb.support.photopicker.config.PhotoPickConfig;
+import com.jkb.support.photopicker.utils.ImageUtils;
+import com.jkb.support.photopicker.utils.UCropUtils;
+import com.jkb.support.utils.LogUtils;
+import com.yalantis.ucrop.UCrop;
 
+import java.io.File;
 import java.util.ArrayList;
 
 /**
@@ -43,6 +51,8 @@ public class PhotoPickerFragment extends PhotoPickBaseFragment implements PhotoP
     //fragment
     private PhotoPickFragment mPhotoPickFragment;
     private String mPickTag;
+    private PhotoPreviewFragment mPreviewFragment;
+    private String mPreTag;
     //listener
     private PhotoSelectStatusChangedListener photoSelectStatusChangedListener;
     private PhotoPickerResultCallback photoPickerResultCallback;
@@ -54,7 +64,6 @@ public class PhotoPickerFragment extends PhotoPickBaseFragment implements PhotoP
 
     @Override
     protected void initView() {
-
     }
 
     @Override
@@ -66,8 +75,18 @@ public class PhotoPickerFragment extends PhotoPickBaseFragment implements PhotoP
             mPhotoBean = savedInstanceState.getParcelable(PhotoPickConfig.KeyBundle.PHOTO_PICK);
         }
         initPickFragment();
+        initPreviewFragment();
         if (savedInstanceState == null) {
             showFragment(mPhotoPickFragment, pickerContent);
+        }
+    }
+
+    /**
+     * 初始化预览
+     */
+    private void initPreviewFragment() {
+        if (!TextUtils.isEmpty(mPreTag)) {
+            mPreviewFragment = (PhotoPreviewFragment) SupportManager.getFragment(mChildFm, mPreTag);
         }
     }
 
@@ -95,6 +114,7 @@ public class PhotoPickerFragment extends PhotoPickBaseFragment implements PhotoP
         super.onSaveInstanceState(outState);
         outState.putParcelable(PhotoPickConfig.KeyBundle.PHOTO_PICK, mPhotoBean);
         outState.putString(PhotoPickConfig.KeyBundle.FRAGMENT_TAG_PICK, mPickTag);
+        outState.putString(PhotoPickConfig.KeyBundle.FRAGMENT_TAG_PREVIEW, mPreTag);
     }
 
     @Override
@@ -123,32 +143,65 @@ public class PhotoPickerFragment extends PhotoPickBaseFragment implements PhotoP
      * 显示图片预览
      */
     private void showPreView(int position, ArrayList<Photo> photos) {
-        PhotoPreviewFragment preViewFragment = PhotoPreviewFragment.newInstance(position, photos, mPhotoBean);
+        mPreviewFragment = PhotoPreviewFragment.newInstance(position, photos, mPhotoBean);
+        mPreTag = mPreviewFragment.getFragmentTAG();
         //设置监听器等
-        preViewFragment.addPhotoPreviewOnBackResultCallback(this);
-        preViewFragment.addOnClipItemClickListener(this);
-        preViewFragment.addPhotoSelectStatusChangedListener(this);
+        mPreviewFragment.addPhotoPreviewOnBackResultCallback(this);
+        mPreviewFragment.addOnClipItemClickListener(this);
+        mPreviewFragment.addPhotoSelectStatusChangedListener(this);
         //显示
-        showFragment(preViewFragment, pickerContent);
+        showFragment(mPreviewFragment, pickerContent);
     }
 
     @Override
     public void onPreviewBackPressed(ArrayList<Photo> photos) {
-        if (mPhotoPickFragment != null) {
-            mPhotoPickFragment.refreshPhotos();
-        }
+        if (mPhotoPickFragment != null) mPhotoPickFragment.refreshPhotos();
     }
 
     @Override
     public void onPhotoClipItemClick(int position, Photo photo) {
-        showClip(position, photo);
+        showClip(photo);
     }
+
+    /*待裁剪的图片*/
+    private Photo cropPhoto;
 
     /**
      * 显示图片裁剪
      */
-    private void showClip(int position, Photo photo) {
+    private void showClip(Photo photo) {
+        cropPhoto = photo;
+        String imagePath = ImageUtils.getImagePath(mContext, "/Crop/");
+        File corpFile = new File(imagePath + ImageUtils.createFile());
+        LogUtils.d(this, "clip path=" + photo.getPath());
+        UCropUtils.start(this, mContext, new File(photo.getPath()), corpFile,
+                mPhotoBean.getClipMode() == PhotoPickConfig.ClipMode.CIRCLE,
+                mPhotoBean.getClipActionBarBackgroundColor());
+    }
 
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (resultCode != Activity.RESULT_OK) return;
+        switch (requestCode) {
+            case UCrop.REQUEST_CROP:
+                handleClipResult(UCrop.getOutput(data));
+                break;
+            case UCrop.RESULT_ERROR:
+                Throwable cropError = UCrop.getError(data);
+                LogUtils.d(this, "裁剪失败:" + cropError.getMessage());
+                break;
+        }
+    }
+
+    /**
+     * 处理裁剪结果
+     */
+    private void handleClipResult(Uri output) {
+        LogUtils.d(this, "裁剪成功：" + output.getPath());
+        cropPhoto.setPath(output.getPath());
+        if (mPhotoPickFragment != null) mPhotoPickFragment.refreshPhotos();
+        if (mPreviewFragment != null) mPreviewFragment.refreshPhotos();
     }
 
     ///////////////////////////////////////PickerAction///////////////////////////////

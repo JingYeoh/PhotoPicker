@@ -41,4 +41,5 @@ dependencies {
     apt 'com.zhy:mpermission-compiler:1.0.0'
     compile 'com.github.yalantis:ucrop:2.2.1'
     compile 'com.github.chrisbanes:PhotoView:2.0.0'
+    compile 'com.android.support:exifinterface:25.3.1'
 }

@@ -8,6 +8,10 @@ import com.jkb.support.photopicker.business.action.PhotoPickerAction;
  */
 
 public interface PhotoPreViewAction extends PhotoPickerAction {
+    /**
+     * 刷新照片
+     */
+    void refreshPhotos();
 
     /**
      * 设置裁剪的点击监听事件

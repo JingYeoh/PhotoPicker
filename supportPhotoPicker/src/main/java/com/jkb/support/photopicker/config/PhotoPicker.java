@@ -1,5 +1,6 @@
 package com.jkb.support.photopicker.config;
 
+import android.support.annotation.ColorRes;
 import android.support.annotation.DrawableRes;
 import android.support.annotation.NonNull;
 
@@ -129,6 +130,14 @@ public class PhotoPicker {
          */
         public Builder failedPictureDrawable(@DrawableRes int failedPictureResId) {
             photoPickBean.setFailedPictureResId(failedPictureResId);
+            return this;
+        }
+
+        /**
+         * 设置图片裁剪的背景颜色
+         */
+        public Builder clipActionBarBackgroundColor(@ColorRes int color) {
+            photoPickBean.setClipActionBarBackgroundColor(color);
             return this;
         }
 
